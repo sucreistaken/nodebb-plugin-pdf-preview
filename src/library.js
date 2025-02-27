@@ -72,7 +72,7 @@ PDFPreviewPlugin.parse = function (data, callback) {
             <style>${mobileStyles}</style>
             <div style="${containerStyles}">
                 <iframe src="${url}#toolbar=0" style="${styles}" allowfullscreen></iframe>
-                <button onclick="expandPDF(this, '${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
+                <button onclick="expandPDF('${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
             </div>
         `;
     });
@@ -83,7 +83,7 @@ PDFPreviewPlugin.parse = function (data, callback) {
             <style>${mobileStyles}</style>
             <div style="${containerStyles}">
                 <iframe src="${url}#toolbar=0" style="${styles}" allowfullscreen></iframe>
-                <button onclick="expandPDF(this, '${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
+                <button onclick="expandPDF('${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
             </div>
         `;
     });
@@ -91,19 +91,21 @@ PDFPreviewPlugin.parse = function (data, callback) {
     // 📌 JavaScript ile tam ekran büyütme/küçültme özelliği
     data.postData.content += `
         <script>
-            function expandPDF(button, url) {
+            function expandPDF(url) {
                 var fullscreenDiv = document.createElement('div');
                 fullscreenDiv.style = '${fullscreenStyles}';
                 fullscreenDiv.innerHTML = \`
-                    <button onclick="closePDF(this)" style="${closeButtonStyles}">❌ Kapat</button>
+                    <button onclick="closePDF()" style="${closeButtonStyles}">❌ Kapat</button>
                     <iframe src="\${url}#toolbar=1&view=Fit" style="width:90%; height:90%; border:none;"></iframe>
                 \`;
                 document.body.appendChild(fullscreenDiv);
             }
 
-            function closePDF(button) {
-                var fullscreenDiv = button.parentElement;
-                fullscreenDiv.remove();
+            function closePDF() {
+                var fullscreenDiv = document.querySelector('div[style*="position: fixed"]');
+                if (fullscreenDiv) {
+                    fullscreenDiv.remove();
+                }
             }
         </script>
     `;

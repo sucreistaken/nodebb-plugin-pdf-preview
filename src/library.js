@@ -40,7 +40,7 @@ PDFPreviewPlugin.parse = function (data, callback) {
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.9);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -60,9 +60,13 @@ PDFPreviewPlugin.parse = function (data, callback) {
         border-radius: 5px;
     `;
 
+    // 1️⃣ Harici PDF linkleri için regex
     var pdfRegex = /<a href="(https?:\/\/[^"]+\.pdf)"[^>]*>([^<]+)<\/a>/g;
 
-    // PDF linklerini otomatik iframe embed formatına dönüştür
+    // 2️⃣ NodeBB'nin yüklediği PDF dosyaları için regex
+    var uploadedPdfRegex = /<a class="post-attachment" href="([^"]+\.pdf)">([^<]+)<\/a>/g;
+
+    // 📌 Harici PDF linklerini otomatik olarak iframe'e çevir
     data.postData.content = data.postData.content.replace(pdfRegex, function (match, url) {
         return `
             <style>${mobileStyles}</style>
@@ -73,7 +77,18 @@ PDFPreviewPlugin.parse = function (data, callback) {
         `;
     });
 
-    // JavaScript kodu ekleyerek büyütme/küçültme işlevi sağlıyoruz
+    // 📌 NodeBB tarafından yüklenen PDF dosyalarını algıla ve iframe'e çevir
+    data.postData.content = data.postData.content.replace(uploadedPdfRegex, function (match, url) {
+        return `
+            <style>${mobileStyles}</style>
+            <div style="${containerStyles}">
+                <iframe src="${url}#toolbar=0" style="${styles}" allowfullscreen></iframe>
+                <button onclick="expandPDF(this, '${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
+            </div>
+        `;
+    });
+
+    // 📌 JavaScript ile tam ekran büyütme/küçültme özelliği
     data.postData.content += `
         <script>
             function expandPDF(button, url) {
@@ -81,7 +96,7 @@ PDFPreviewPlugin.parse = function (data, callback) {
                 fullscreenDiv.style = '${fullscreenStyles}';
                 fullscreenDiv.innerHTML = \`
                     <button onclick="closePDF(this)" style="${closeButtonStyles}">❌ Kapat</button>
-                    <iframe src="\${url}#toolbar=0" style="width:90%; height:90%; border:none;"></iframe>
+                    <iframe src="\${url}#toolbar=1&view=Fit" style="width:90%; height:90%; border:none;"></iframe>
                 \`;
                 document.body.appendChild(fullscreenDiv);
             }

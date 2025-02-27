@@ -86,11 +86,12 @@ PDFPreviewPlugin.parse = function (data, callback) {
     data.postData.content += `
         <script>
             function expandPDF(url) {
+                if (!url) return;
                 var fullscreenDiv = document.createElement('div');
                 fullscreenDiv.style = '${fullscreenStyles}';
                 fullscreenDiv.innerHTML = ` + "`" + `
                     <button onclick="closePDF()" style="${closeButtonStyles}">❌ Kapat</button>
-                    <iframe src="${url}#toolbar=1&view=Fit" style="width:90%; height:90%; border:none;"></iframe>
+                    <iframe src="` + url + `#toolbar=1&view=Fit" style="width:90%; height:90%; border:none;"></iframe>
                 ` + "`" + `;
                 document.body.appendChild(fullscreenDiv);
             }

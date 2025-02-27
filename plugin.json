@@ -1,0 +1,14 @@
+{
+    "id": "nodebb-plugin-pdf-preview",
+    "name": "NodeBB Plugin PDF Preview",
+    "description": "📄 A plugin for NodeBB to embed PDF files in posts.",
+    "repository": "https://github.com/heudev/nodebb-plugin-pdf-preview",
+    "library": "./src/library.js",
+    "hooks": [
+        {
+            "hook": "filter:parse.post",
+            "method": "parse",
+            "priority": 6
+        }
+    ]
+}

@@ -16,7 +16,7 @@ plugin.filterPostContent = async function (data) {
     const pdfRegex = /(https?:\/\/[^\s]+\.pdf)/g;
     data.postData.content = data.postData.content.replace(pdfRegex, (match) => {
         return `<div class="pdf-preview-container">
-                    <iframe src="https://mozilla.github.io/pdf.js/web/viewer.html?file=${match}" width="100%" height="500px"></iframe>
+                    <iframe src="${match}" width="100%" height="500px" style="border: none;"></iframe>
                 </div>`;
     });
     return data;

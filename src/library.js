@@ -7,103 +7,29 @@ PDFPreviewPlugin.parse = function (data, callback) {
         return callback(null, data);
     }
 
-    var styles = `
-        width: 100%;
-        max-width: 800px;
-        height: 600px;
-        border: none;
-        margin: 20px auto;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease-in-out;
-    `;
+    var styles = 'width: 100%; height: 600px; border: none; margin-top: 10px;';
 
-    var containerStyles = `
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        position: relative;
-    `;
+    // RegExp: Harici PDF linklerini algılar
+    var pdfRegex = /<a href="(https?:\/\/[^"]+\.pdf)"[^>]*>([^<]+)<\/a>/g;
+    // RegExp: NodeBB'ye yüklenen PDF'leri algılar
+    var uploadedPdfRegex = /<a class="post-attachment" href="([^"]+\.pdf)">([^<]+)<\/a>/g;
 
-    var mobileStyles = `
-        @media (max-width: 768px) {
-            iframe {
-                width: 100%;
-                height: 400px;
-            }
-        }
-    `;
-
-    var fullscreenStyles = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.9);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    `;
-
-    var closeButtonStyles = `
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: red;
-        color: white;
-        border: none;
-        padding: 10px;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 5px;
-    `;
-
-    var pdfRegex = /<a href="(https?:\/\/[^\s]+\.pdf)"[^>]*>([^<]+)<\/a>/g;
-    var uploadedPdfRegex = /<a class="post-attachment" href="([^\s]+\.pdf)">([^<]+)<\/a>/g;
-
-    data.postData.content = data.postData.content.replace(pdfRegex, function (match, url) {
+    // 📌 Harici PDF linklerini otomatik olarak iframe'e çevir
+    data.postData.content = data.postData.content.replace(pdfRegex, function (match, url, text) {
         return `
-            <style>${mobileStyles}</style>
-            <div style="${containerStyles}">
-                <iframe src="${url}#toolbar=0" style="${styles}" allowfullscreen></iframe>
-                <button onclick="expandPDF('${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
+            <div style="margin: 10px 0;">
+                <iframe src="${url}" style="${styles}" allowfullscreen></iframe>
+                <p><a href="${url}" target="_blank">${text}</a></p>
             </div>
         `;
     });
 
-    data.postData.content = data.postData.content.replace(uploadedPdfRegex, function (match, url) {
+    // 📌 NodeBB'ye yüklenen PDF dosyaları sadece link olarak gösterilecek
+    data.postData.content = data.postData.content.replace(uploadedPdfRegex, function (match, url, text) {
         return `
-            <style>${mobileStyles}</style>
-            <div style="${containerStyles}">
-                <iframe src="${url}#toolbar=0" style="${styles}" allowfullscreen></iframe>
-                <button onclick="expandPDF('${url}')" style="position:absolute; bottom:10px; right:10px; background:#007bff; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px;">🔍 Büyüt</button>
-            </div>
+            <p><a href="${url}" target="_blank" style="color: #007bff; text-decoration: none;">📄 ${text}</a></p>
         `;
     });
-
-    data.postData.content += `
-        <script>
-            function expandPDF(url) {
-                if (!url) return;
-                var fullscreenDiv = document.createElement('div');
-                fullscreenDiv.style = '${fullscreenStyles}';
-                fullscreenDiv.innerHTML = ` + "`" + `
-                    <button onclick="closePDF()" style="${closeButtonStyles}">❌ Kapat</button>
-                    <iframe src="` + url + `#toolbar=1&view=Fit" style="width:90%; height:90%; border:none;"></iframe>
-                ` + "`" + `;
-                document.body.appendChild(fullscreenDiv);
-            }
-
-            function closePDF() {
-                var fullscreenDiv = document.querySelector('div[style*="position: fixed"]');
-                if (fullscreenDiv) {
-                    fullscreenDiv.remove();
-                }
-            }
-        </script>
-    `;
 
     callback(null, data);
 };
